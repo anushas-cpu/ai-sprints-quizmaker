@@ -1,20 +1,12 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Plus } from "lucide-react";
 
 import { DashboardShell } from "@/components/mcq/dashboard-shell";
-import { McqRowActions } from "@/components/mcq/mcq-row-actions";
-import { Button } from "@/components/ui/button";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
+import { McqEmptyState } from "@/components/mcq/mcq-empty-state";
+import { McqPageCard } from "@/components/mcq/mcq-page-card";
+import { McqTable } from "@/components/mcq/mcq-table";
+import { ButtonLink } from "@/components/ui/button";
 import { requireAuth } from "@/lib/auth/session";
-import { MCQ_MESSAGES } from "@/lib/mcq/messages";
 import { MCQ_ROUTES } from "@/lib/mcq/routes";
 import { listMcqsByUser } from "@/lib/services/mcq";
 
@@ -34,46 +26,15 @@ export default async function McqListPage() {
 			title="Multiple choice questions"
 			description="Create, edit, preview, and delete your questions."
 			action={
-				<Button render={<Link href={MCQ_ROUTES.new} />}>
+				<ButtonLink href={MCQ_ROUTES.new}>
 					<Plus />
 					New question
-				</Button>
+				</ButtonLink>
 			}
 		>
-			<div className="rounded-xl border bg-card ring-1 ring-foreground/10">
-				{mcqs.length === 0 ? (
-					<div className="p-8 text-center text-sm text-muted-foreground">
-						<p>{MCQ_MESSAGES.list.empty}</p>
-						<Button className="mt-4" render={<Link href={MCQ_ROUTES.new} />}>
-							<Plus />
-							Create question
-						</Button>
-					</div>
-				) : (
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead>Name</TableHead>
-								<TableHead>Question</TableHead>
-								<TableHead className="w-[80px] text-right">Actions</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{mcqs.map((mcq) => (
-								<TableRow key={mcq.id}>
-									<TableCell className="font-medium">{mcq.name}</TableCell>
-									<TableCell className="max-w-md truncate text-muted-foreground">
-										{mcq.question}
-									</TableCell>
-									<TableCell className="text-right">
-										<McqRowActions mcqId={mcq.id} mcqName={mcq.name} />
-									</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				)}
-			</div>
+			<McqPageCard>
+				{mcqs.length === 0 ? <McqEmptyState /> : <McqTable mcqs={mcqs} />}
+			</McqPageCard>
 		</DashboardShell>
 	);
 }

@@ -183,8 +183,14 @@ CREATE TABLE mcq_attempts (
 
 **Deliverables**:
 - `src/lib/mcq/validation.ts`
+- `src/lib/mcq/form.ts`
+- `src/lib/mcq/handlers.ts`
 - `src/lib/mcq/actions.ts`
+- `src/lib/mcq/index.ts`
 - `src/app/api/mcqs/**`
+- `src/lib/mcq/validation.test.ts`
+- `src/lib/mcq/form.test.ts`
+- `src/lib/mcq/handlers.test.ts`
 
 ### Phase 3: Frontend - COMPLETED
 
@@ -192,12 +198,17 @@ CREATE TABLE mcq_attempts (
 
 **Tasks**:
 1. Install shadcn dropdown, textarea, alert-dialog, radio-group
-2. Build MCQ table, form, preview components
-3. Add protected dashboard routes
+2. Build MCQ table, form, preview, empty state, and delete dialog components
+3. Add protected dashboard routes with shared shell and not-found handling
+4. Add component tests for key UI flows
 
 **Deliverables**:
 - `src/app/dashboard/mcqs/**`
 - `src/components/mcq/**`
+- `src/components/mcq/mcq-empty-state.test.tsx`
+- `src/components/mcq/mcq-form.test.tsx`
+- `src/components/mcq/mcq-preview.test.tsx`
+- `src/lib/mcq/actions.test.ts`
 
 ---
 
@@ -206,6 +217,8 @@ CREATE TABLE mcq_attempts (
 ### Key Files
 - `src/lib/db/mcq.schema.ts` — Drizzle table definitions and relations
 - `src/lib/services/mcq.ts` — Domain service for MCQ CRUD and attempts
+- `src/lib/mcq/handlers.ts` — Testable API handler logic with consistent error responses
+- `src/lib/mcq/form.ts` — FormData parsing for Server Actions
 - `src/lib/mcq/actions.ts` — Server Actions for form create/update/delete
 - `src/app/api/mcqs/route.ts` — List and create API
 - `src/app/api/mcqs/[id]/route.ts` — Read, update, delete API

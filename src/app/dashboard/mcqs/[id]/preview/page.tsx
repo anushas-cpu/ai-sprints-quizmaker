@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { DashboardShell } from "@/components/mcq/dashboard-shell";
+import { McqPageCard } from "@/components/mcq/mcq-page-card";
 import { McqPreview } from "@/components/mcq/mcq-preview";
 import { requireAuth } from "@/lib/auth/session";
 import { MCQ_ROUTES } from "@/lib/mcq/routes";
@@ -14,9 +15,9 @@ type PreviewMcqPageProps = {
 };
 
 export async function generateMetadata({ params }: PreviewMcqPageProps): Promise<Metadata> {
-	const { id } = await params;
+	await params;
 	return {
-		title: `Preview Question ${id} | Quiz Maker`,
+		title: "Preview Question | Quiz Maker",
 		description: "Preview a multiple choice question",
 	};
 }
@@ -35,9 +36,9 @@ export default async function PreviewMcqPage({ params }: PreviewMcqPageProps) {
 			title="Preview question"
 			description="Try answering this question. Your attempt will be recorded."
 		>
-			<div className="rounded-xl border bg-card p-6 ring-1 ring-foreground/10">
+			<McqPageCard>
 				<McqPreview mcq={mcq} />
-			</div>
+			</McqPageCard>
 		</DashboardShell>
 	);
 }

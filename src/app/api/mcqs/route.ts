@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 
 import { requireApiSession } from "@/lib/mcq/api-auth";
-import { mcqFormSchema } from "@/lib/mcq/validation";
-import { createMcq, listMcqsByUser } from "@/lib/services/mcq";
+import {
+	createMcqHandler,
+	listMcqsHandler,
+	parseJsonBody,
+	toJsonResponse,
+} from "@/lib/mcq/handlers";
 
 export async function GET() {
 	const auth = await requireApiSession();
@@ -10,8 +14,8 @@ export async function GET() {
 		return auth.response;
 	}
 
-	const mcqs = await listMcqsByUser(auth.session.user.id);
-	return NextResponse.json({ mcqs });
+	const result = await listMcqsHandler(auth.session.user.id);
+	return toJsonResponse(result);
 }
 
 export async function POST(request: Request) {
@@ -20,21 +24,11 @@ export async function POST(request: Request) {
 		return auth.response;
 	}
 
-	let body: unknown;
-	try {
-		body = await request.json();
-	} catch {
+	const body = await parseJsonBody(request);
+	if (body === null) {
 		return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
 	}
 
-	const parsed = mcqFormSchema.safeParse(body);
-	if (!parsed.success) {
-		return NextResponse.json(
-			{ error: "Validation failed.", issues: parsed.error.issues },
-			{ status: 400 },
-		);
-	}
-
-	const mcq = await createMcq(auth.session.user.id, parsed.data);
-	return NextResponse.json({ mcq }, { status: 201 });
+	const result = await createMcqHandler(auth.session.user.id, body);
+	return toJsonResponse(result);
 }

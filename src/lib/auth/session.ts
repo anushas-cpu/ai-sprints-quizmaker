@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 
 import { AUTH_ROUTES, buildSignInUrl } from "@/lib/auth/routes";
@@ -9,14 +10,14 @@ import {
 
 export type CurrentSession = AppSession;
 
-export async function getCurrentSession(): Promise<AppSession | null> {
+export const getCurrentSession = cache(async (): Promise<AppSession | null> => {
 	const token = await getSessionTokenFromCookie();
 	if (!token) {
 		return null;
 	}
 
 	return getSessionWithUser(token);
-}
+});
 
 export async function requireAuth(callbackPath: string = AUTH_ROUTES.dashboard): Promise<CurrentSession> {
 	const session = await getCurrentSession();

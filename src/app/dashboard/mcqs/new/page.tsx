@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { DashboardShell } from "@/components/mcq/dashboard-shell";
 import { McqForm } from "@/components/mcq/mcq-form";
+import { McqPageCard } from "@/components/mcq/mcq-page-card";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +17,9 @@ export default function NewMcqPage() {
 			title="New multiple choice question"
 			description="Add a name, question text, and between two and six choices."
 		>
-			<div className="rounded-xl border bg-card p-6 ring-1 ring-foreground/10">
+			<McqPageCard>
 				<McqForm mode="create" />
-			</div>
+			</McqPageCard>
 		</DashboardShell>
 	);
 }

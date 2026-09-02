@@ -3,13 +3,16 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
+import { buildSignInUrl } from "@/lib/auth/routes";
 import { getCurrentSession } from "@/lib/auth/session";
+import { parseMcqFormData } from "@/lib/mcq/form";
 import { MCQ_MESSAGES } from "@/lib/mcq/messages";
 import { MCQ_ROUTES } from "@/lib/mcq/routes";
-import { flattenZodErrors, mcqFormSchema, type FieldErrors } from "@/lib/mcq/validation";
+import { flattenZodErrors, mcqAttemptSchema, type FieldErrors } from "@/lib/mcq/validation";
 import {
 	createMcq,
 	deleteMcq,
+	recordMcqAttempt,
 	updateMcq,
 } from "@/lib/services/mcq";
 
@@ -18,45 +21,27 @@ export type McqFormState = {
 	formError?: string;
 };
 
-function parseChoicesFromFormData(formData: FormData) {
-	const choiceCount = Number(formData.get("choiceCount") ?? "0");
-	const correctIndex = Number(formData.get("correctChoiceIndex") ?? "-1");
-	const choices = [];
+export type McqAttemptState = {
+	error?: string;
+	result?: "correct" | "incorrect";
+};
 
-	for (let index = 0; index < choiceCount; index += 1) {
-		const text = String(formData.get(`choiceText_${index}`) ?? "");
-		choices.push({
-			text,
-			isCorrect: index === correctIndex,
-		});
+async function requireUserId(callbackPath: string): Promise<string> {
+	const session = await getCurrentSession();
+	if (!session) {
+		redirect(buildSignInUrl({ callbackUrl: callbackPath }));
 	}
 
-	return choices;
-}
-
-function parseMcqFormData(formData: FormData) {
-	return mcqFormSchema.safeParse({
-		name: formData.get("name"),
-		question: formData.get("question"),
-		choices: parseChoicesFromFormData(formData),
-	});
-}
-
-async function requireUserId(): Promise<string | null> {
-	const session = await getCurrentSession();
-	return session?.user.id ?? null;
+	return session.user.id;
 }
 
 export async function createMcqAction(
 	_prevState: McqFormState,
 	formData: FormData,
 ): Promise<McqFormState> {
-	const userId = await requireUserId();
-	if (!userId) {
-		redirect("/sign-in");
-	}
-
+	const userId = await requireUserId(MCQ_ROUTES.new);
 	const parsed = parseMcqFormData(formData);
+
 	if (!parsed.success) {
 		return { errors: flattenZodErrors(parsed.error) };
 	}
@@ -76,12 +61,9 @@ export async function updateMcqAction(
 	_prevState: McqFormState,
 	formData: FormData,
 ): Promise<McqFormState> {
-	const userId = await requireUserId();
-	if (!userId) {
-		redirect("/sign-in");
-	}
-
+	const userId = await requireUserId(MCQ_ROUTES.edit(mcqId));
 	const parsed = parseMcqFormData(formData);
+
 	if (!parsed.success) {
 		return { errors: flattenZodErrors(parsed.error) };
 	}
@@ -100,17 +82,47 @@ export async function updateMcqAction(
 }
 
 export async function deleteMcqAction(mcqId: string): Promise<void> {
-	const userId = await requireUserId();
-	if (!userId) {
-		redirect("/sign-in");
-	}
+	const userId = await requireUserId(MCQ_ROUTES.list);
 
 	try {
-		await deleteMcq(mcqId, userId);
-	} catch {
+		const deleted = await deleteMcq(mcqId, userId);
+		if (!deleted) {
+			throw new Error(MCQ_MESSAGES.form.notFound);
+		}
+	} catch (error) {
+		if (error instanceof Error && error.message === MCQ_MESSAGES.form.notFound) {
+			throw error;
+		}
+
 		throw new Error(MCQ_MESSAGES.delete.serverError);
 	}
 
 	revalidatePath(MCQ_ROUTES.list);
 	redirect(MCQ_ROUTES.list);
+}
+
+export async function recordMcqAttemptAction(
+	mcqId: string,
+	_prevState: McqAttemptState,
+	formData: FormData,
+): Promise<McqAttemptState> {
+	const userId = await requireUserId(MCQ_ROUTES.preview(mcqId));
+	const parsed = mcqAttemptSchema.safeParse({
+		choiceId: formData.get("choiceId"),
+	});
+
+	if (!parsed.success) {
+		return { error: MCQ_MESSAGES.attempt.invalidChoice };
+	}
+
+	try {
+		const attempt = await recordMcqAttempt(mcqId, userId, parsed.data.choiceId);
+		if (!attempt) {
+			return { error: MCQ_MESSAGES.attempt.invalidChoice };
+		}
+
+		return { result: attempt.isCorrect ? "correct" : "incorrect" };
+	} catch {
+		return { error: MCQ_MESSAGES.attempt.serverError };
+	}
 }
