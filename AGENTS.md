@@ -11,9 +11,10 @@ the problem, the primary user, and the current state. Two or three sentences.
 Keep it current. An out-of-date description here misleads every future conversation.
 -->
 
-This is an unmodified AISprints starter. No application features have been built yet.
-The technical PRD in `ai-workspace/` is the source of truth for what is being built and
-for the current phase of work.
+Quiz Maker is a web application for creating and taking quizzes. Sprint 1 is implementing
+the authentication module (Phase 1 foundation complete). The technical PRD in
+`ai-workspace/` is the source of truth for what is being built and for the current phase
+of work.
 
 ## Stack
 
@@ -24,8 +25,11 @@ for the current phase of work.
 - **TypeScript** in strict mode
 - **Wrangler** for Cloudflare configuration, secrets, and deployment
 
-No database, authentication, testing framework, or AI SDK is installed yet. Do not
-write code that imports one without adding it first and telling the user.
+No testing framework or AI SDK is installed yet. Do not write code that imports one
+without adding it first and telling the user.
+
+**Authentication stack (Phase 1):** Better Auth, Cloudflare D1 (binding `DB`), Drizzle ORM.
+Secrets: `BETTER_AUTH_SECRET` in `.dev.vars`. Vars: `BETTER_AUTH_URL` in `wrangler.jsonc`.
 
 ## Layout
 

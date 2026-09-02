@@ -1,2 +1,6 @@
 # Load .env.development* files when running `wrangler dev`
 NEXTJS_ENV=development
+
+# Authentication (generate a random 32+ character secret for local development)
+BETTER_AUTH_SECRET=wcQKBAfJf/Yxa0tFakVRuz8jzxLHyfI3Z2FngURTxBs=
+BETTER_AUTH_URL=http://localhost:3000

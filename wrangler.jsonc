@@ -4,19 +4,33 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "aisprints-starter",
+	"name": "ai-sprints-quizmaker",
 	"main": ".open-next/worker.js",
 	"compatibility_date": "2026-07-01",
 	"compatibility_flags": [
 		"nodejs_compat",
 		"global_fetch_strictly_public"
 	],
+	"alias": {
+		"sqlite": "./src/lib/stubs/sqlite.js"
+	},
 	"assets": {
 		"binding": "ASSETS",
 		"directory": ".open-next/assets"
 	},
 	"observability": {
 		"enabled": true
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "quizmaker-db",
+			"database_id": "18ddd196-b5aa-4edb-963f-e89380d1a22a",
+			"migrations_dir": "drizzle"
+		}
+	],
+	"vars": {
+	"BETTER_AUTH_URL": "https://ai-sprints-quizmaker.anusha-quizmaker.workers.dev"
 	}
 	/**
 	 * Smart Placement
