@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { and, eq, gt } from "drizzle-orm";
 
@@ -17,10 +18,12 @@ export type AppSession = {
 	user: SessionUser;
 };
 
-export async function getSessionTokenFromCookie(): Promise<string | undefined> {
-	const cookieStore = await cookies();
-	return cookieStore.get(SESSION_COOKIE_NAME)?.value;
-}
+export const getSessionTokenFromCookie = cache(
+	async (): Promise<string | undefined> => {
+		const cookieStore = await cookies();
+		return cookieStore.get(SESSION_COOKIE_NAME)?.value;
+	},
+);
 
 export async function setSessionCookie(token: string): Promise<void> {
 	const cookieStore = await cookies();

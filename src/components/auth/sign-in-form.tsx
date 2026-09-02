@@ -123,16 +123,14 @@ export function SignInForm({
 								aria-invalid={Boolean(state.errors?.password)}
 								aria-describedby={fieldDescribedBy("password", Boolean(state.errors?.password))}
 							/>
-							<Button
+							<button
 								type="button"
-								variant="ghost"
-								size="icon-sm"
-								className="absolute top-1/2 right-1 -translate-y-1/2"
+								className="absolute top-1/2 right-1 flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
 								onClick={() => setShowPassword((current) => !current)}
 								aria-label={showPassword ? "Hide password" : "Show password"}
 							>
-								{showPassword ? <EyeOff /> : <Eye />}
-							</Button>
+								{showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+							</button>
 						</div>
 						<FieldError id={formErrorId("password")} errors={getFieldErrors(state.errors, "password")} />
 					</Field>

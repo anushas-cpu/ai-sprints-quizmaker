@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { DashboardShell } from "@/components/mcq/dashboard-shell";
 import { McqForm } from "@/components/mcq/mcq-form";
+import { McqPageCard } from "@/components/mcq/mcq-page-card";
 import { requireAuth } from "@/lib/auth/session";
 import { MCQ_ROUTES } from "@/lib/mcq/routes";
 import { getMcqByIdForUser } from "@/lib/services/mcq";
@@ -14,10 +15,9 @@ type EditMcqPageProps = {
 };
 
 export async function generateMetadata({ params }: EditMcqPageProps): Promise<Metadata> {
-	const { id } = await params;
+	await params;
 	return {
-		title: `Edit Question ${id} | Quiz Maker`,
-		description: "Edit a multiple choice question",
+		title: "Edit Question | Quiz Maker",
 	};
 }
 
@@ -35,9 +35,9 @@ export default async function EditMcqPage({ params }: EditMcqPageProps) {
 			title="Edit multiple choice question"
 			description="Update the name, question, and choices."
 		>
-			<div className="rounded-xl border bg-card p-6 ring-1 ring-foreground/10">
+			<McqPageCard>
 				<McqForm mode="edit" initialMcq={mcq} />
-			</div>
+			</McqPageCard>
 		</DashboardShell>
 	);
 }

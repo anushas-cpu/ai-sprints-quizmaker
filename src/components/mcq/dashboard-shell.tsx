@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { LogoutButton } from "@/components/auth/logout-button";
-import { Button } from "@/components/ui/button";
 
 type DashboardShellProps = {
 	title: string;
@@ -32,9 +31,6 @@ export function DashboardShell({
 				</div>
 				<div className="flex items-center gap-2">
 					{action}
-					<Button variant="outline" size="sm" render={<Link href="/dashboard/mcqs" />}>
-						Questions
-					</Button>
 					<LogoutButton />
 				</div>
 			</header>

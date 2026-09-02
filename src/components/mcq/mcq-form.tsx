@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { Loader2, Minus, Plus } from "lucide-react";
 import { useActionState, useMemo, useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import {
 	Field,
 	FieldError,
@@ -27,6 +26,7 @@ const MIN_CHOICES = 2;
 const MAX_CHOICES = 6;
 
 type ChoiceField = {
+	clientId: string;
 	text: string;
 };
 
@@ -40,12 +40,19 @@ function getFieldErrors(errors: McqFormState["errors"], field: string) {
 	return messages?.map((message) => ({ message }));
 }
 
+function createChoice(text = ""): ChoiceField {
+	return {
+		clientId: crypto.randomUUID(),
+		text,
+	};
+}
+
 function buildInitialChoices(initialMcq?: McqWithChoices): ChoiceField[] {
 	if (initialMcq?.choices.length) {
-		return initialMcq.choices.map((choice) => ({ text: choice.text }));
+		return initialMcq.choices.map((choice) => createChoice(choice.text));
 	}
 
-	return [{ text: "" }, { text: "" }];
+	return [createChoice(), createChoice()];
 }
 
 function getInitialCorrectIndex(initialMcq?: McqWithChoices) {
@@ -66,6 +73,8 @@ export function McqForm({ mode, initialMcq }: McqFormProps) {
 		[mode, initialMcq],
 	);
 	const [state, formAction, isPending] = useActionState(action, {});
+	const [name, setName] = useState(initialMcq?.name ?? "");
+	const [question, setQuestion] = useState(initialMcq?.question ?? "");
 	const [choices, setChoices] = useState<ChoiceField[]>(() => buildInitialChoices(initialMcq));
 	const [correctChoiceIndex, setCorrectChoiceIndex] = useState(() =>
 		getInitialCorrectIndex(initialMcq),
@@ -78,7 +87,7 @@ export function McqForm({ mode, initialMcq }: McqFormProps) {
 			return;
 		}
 
-		setChoices((current) => [...current, { text: "" }]);
+		setChoices((current) => [...current, createChoice()]);
 	}
 
 	function removeChoice(index: number) {
@@ -100,6 +109,14 @@ export function McqForm({ mode, initialMcq }: McqFormProps) {
 		});
 	}
 
+	function updateChoiceText(index: number, text: string) {
+		setChoices((current) =>
+			current.map((choice, choiceIndex) =>
+				choiceIndex === index ? { ...choice, text } : choice,
+			),
+		);
+	}
+
 	return (
 		<form action={formAction} noValidate className="space-y-6">
 			<input type="hidden" name="choiceCount" value={choices.length} />
@@ -111,7 +128,8 @@ export function McqForm({ mode, initialMcq }: McqFormProps) {
 					<Input
 						id="name"
 						name="name"
-						defaultValue={initialMcq?.name ?? ""}
+						value={name}
+						onChange={(event) => setName(event.target.value)}
 						aria-invalid={Boolean(state.errors?.name)}
 						required
 					/>
@@ -123,7 +141,8 @@ export function McqForm({ mode, initialMcq }: McqFormProps) {
 					<Textarea
 						id="question"
 						name="question"
-						defaultValue={initialMcq?.question ?? ""}
+						value={question}
+						onChange={(event) => setQuestion(event.target.value)}
 						placeholder="Enter the question learners will answer"
 						aria-invalid={Boolean(state.errors?.question)}
 						required
@@ -158,19 +177,23 @@ export function McqForm({ mode, initialMcq }: McqFormProps) {
 					>
 						{choices.map((choice, index) => (
 							<div
-								key={`choice-${index}`}
+								key={choice.clientId}
 								className="flex items-start gap-3 rounded-lg border p-3"
 							>
 								<div className="flex items-center gap-2 pt-2">
-									<RadioGroupItem value={String(index)} id={`correct-${index}`} />
-									<Label htmlFor={`correct-${index}`} className="text-xs text-muted-foreground">
+									<RadioGroupItem value={String(index)} id={`correct-${choice.clientId}`} />
+									<Label
+										htmlFor={`correct-${choice.clientId}`}
+										className="text-xs text-muted-foreground"
+									>
 										Correct
 									</Label>
 								</div>
 								<div className="flex-1 space-y-2">
 									<Input
 										name={`choiceText_${index}`}
-										defaultValue={choice.text}
+										value={choice.text}
+										onChange={(event) => updateChoiceText(index, event.target.value)}
 										placeholder={`Choice ${index + 1}`}
 										aria-label={`Choice ${index + 1}`}
 										required
@@ -205,9 +228,9 @@ export function McqForm({ mode, initialMcq }: McqFormProps) {
 					{isPending ? <Loader2 className="animate-spin" /> : null}
 					Save
 				</Button>
-				<Button variant="outline" render={<Link href={MCQ_ROUTES.list} />}>
+				<ButtonLink variant="outline" href={MCQ_ROUTES.list}>
 					Cancel
-				</Button>
+				</ButtonLink>
 			</div>
 		</form>
 	);
